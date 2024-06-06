@@ -12,11 +12,14 @@ include_directories(C:/Users/amess/vcpkg/installed/x64-windows/include)
 link_directories(C:/Users/amess/vcpkg/installed/x64-windows/lib)
 include(C:/Users/amess/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
+include_directories(include)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(dpp CONFIG REQUIRED) 
 
-add_executable(OrpheusCPP main.cpp) 
+file(GLOB SOURCES "src/*.cpp")
+
+add_executable(OrpheusCPP ${SOURCES}) 
 
 #include(CTest)
 #enable_testing()

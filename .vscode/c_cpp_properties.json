@@ -22,7 +22,8 @@
             "name": "Win64",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${vcpkgRoot}/x64-windows/include"
+                "${vcpkgRoot}/x64-windows/include",
+                "${workspaceFolder}/include/*"
             ],
             "defines": [
                 "_DEBUG",
@@ -39,7 +40,8 @@
             "browse": {
                 "path": [
                     "${vcpkgRoot}/x64-windows/include",
-                    "${workspaceFolder}/*"
+                    "${workspaceFolder}/**",
+                    "${workspaceFolder}/include/*"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             }
