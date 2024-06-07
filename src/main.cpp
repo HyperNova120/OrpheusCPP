@@ -4,7 +4,9 @@
 #include "main.h"
 #include "JsonReader.h"
 #include "HandleEvents.h"
+#include "Logger.h"
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -12,10 +14,10 @@ dpp::cluster bot(getBot_Token());
 
 int main()
 {
+    
+    logDebugInfo("test");
     bot.on_log(dpp::utility::cout_logger());
-
     hookEvents();
-
     bot.start(dpp::st_wait);
 }
 
@@ -36,11 +38,23 @@ void handleSlashCMD(const dpp::slashcommand_t &event)
     dpp::user eventUsr = event.command.get_issuing_user();
     if (eventName == "ping")
     {
-        event.reply(std::string("ping ") + eventUsr.username);
+        event.reply(dpp::message(std::string("ping ") + eventUsr.username).set_flags(dpp::m_ephemeral));
     }
     else if (eventName == "say")
     {
         event.reply(get<string>(event.get_parameter("content")));
+    }
+    else if (eventName == "dm")
+    {
+        dpp::snowflake user = std::get<dpp::snowflake>(event.get_parameter("User"));
+
+        bot.direct_message_create(user, std::get<string>(event.get_parameter("Content")), [event, user](const dpp::confirmation_callback_t &callback)
+                                  {
+            if (callback.is_error())
+            {
+                event.reply(dpp::message("Failed to send DM").set_flags(dpp::m_ephemeral));
+            } else {
+                event.reply(dpp::message("DM sent").set_flags(dpp::m_ephemeral));} });
     }
 }
 
@@ -56,6 +70,11 @@ void handleOnReady(const dpp::ready_t &event)
     dpp::slashcommand sayCMD("say", "Make Orpheus say something", bot.me.id);
     sayCMD.add_option(dpp::command_option(dpp::co_string, "content", "Text to say", true));
     g_cmdVec.push_back(sayCMD);
+
+    dpp::slashcommand dmCMD("dm", "make orpheus dm a user", bot.me.id);
+    dmCMD.add_option(dpp::command_option(dpp::co_mentionable, "User", "User to dm", true));
+    dmCMD.add_option(dpp::command_option(dpp::co_mentionable, "Content", "message", true));
+    g_cmdVec.push_back(dmCMD);
 
     bot.global_bulk_command_create(g_cmdVec);
 }
