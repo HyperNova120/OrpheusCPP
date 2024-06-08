@@ -16,6 +16,7 @@ include_directories(include)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(dpp CONFIG REQUIRED) 
+find_package(nlohmann_json CONFIG REQUIRED)
 
 file(GLOB SOURCES "src/*.cpp")
 
@@ -31,3 +32,4 @@ add_executable(OrpheusCPP ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
 target_link_libraries(${PROJECT_NAME} PRIVATE dpp::dpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)

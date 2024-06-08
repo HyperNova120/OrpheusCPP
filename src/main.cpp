@@ -14,8 +14,6 @@ dpp::cluster bot(getBot_Token());
 
 int main()
 {
-    
-    logDebugInfo("test");
     bot.on_log(dpp::utility::cout_logger());
     hookEvents();
     bot.start(dpp::st_wait);
@@ -46,9 +44,9 @@ void handleSlashCMD(const dpp::slashcommand_t &event)
     }
     else if (eventName == "dm")
     {
-        dpp::snowflake user = std::get<dpp::snowflake>(event.get_parameter("User"));
+        dpp::snowflake user = std::get<dpp::snowflake>(event.get_parameter("user"));
 
-        bot.direct_message_create(user, std::get<string>(event.get_parameter("Content")), [event, user](const dpp::confirmation_callback_t &callback)
+        bot.direct_message_create(user, std::get<string>(event.get_parameter("content")), [event, user](const dpp::confirmation_callback_t &callback)
                                   {
             if (callback.is_error())
             {
@@ -60,7 +58,7 @@ void handleSlashCMD(const dpp::slashcommand_t &event)
 
 void handleOnReady(const dpp::ready_t &event)
 {
-    cout << "creating commands" << endl;
+    logDebugInfo("creating global commands");
     std::vector<dpp::slashcommand> g_cmdVec;
 
     // global commands
@@ -71,9 +69,9 @@ void handleOnReady(const dpp::ready_t &event)
     sayCMD.add_option(dpp::command_option(dpp::co_string, "content", "Text to say", true));
     g_cmdVec.push_back(sayCMD);
 
-    dpp::slashcommand dmCMD("dm", "make orpheus dm a user", bot.me.id);
-    dmCMD.add_option(dpp::command_option(dpp::co_mentionable, "User", "User to dm", true));
-    dmCMD.add_option(dpp::command_option(dpp::co_mentionable, "Content", "message", true));
+    dpp::slashcommand dmCMD("dm", "Make orpheus dm a user", bot.me.id);
+    dmCMD.add_option(dpp::command_option(dpp::co_mentionable, "user", "User to dm", true));
+    dmCMD.add_option(dpp::command_option(dpp::co_string, "content", "Message", true));
     g_cmdVec.push_back(dmCMD);
 
     bot.global_bulk_command_create(g_cmdVec);
