@@ -9,8 +9,25 @@
 #include <string>
 
 using namespace std;
+/*
+       [x]- !say
+       [x]-!dm
+       []-rand gif
+       [x]-!send
+        
+       []-!join
+       []-!leave
+       
+       []-!play
+       []-!pause
+       []-!stop
 
-dpp::cluster bot(getBot_Token());
+       []-!on
+       []-!off
+       []-!dnd
+*/
+
+dpp::cluster bot(getBot_Token(), dpp::i_default_intents | dpp::i_message_content);
 
 int main()
 {
@@ -28,6 +45,10 @@ void hookEvents()
     bot.on_guild_member_add(handleGuildMemberAdd);
     bot.on_guild_member_remove(handleGuildMemberRemove);
     bot.on_guild_member_update(handleGuildMemberUpdate);
+
+    bot.on_message_create(handleMessageCreate);
+    bot.on_message_delete(handleMessageDelete);
+    bot.on_message_update(handleMessageUpdate);
 }
 
 void handleSlashCMD(const dpp::slashcommand_t &event)
@@ -36,23 +57,27 @@ void handleSlashCMD(const dpp::slashcommand_t &event)
     dpp::user eventUsr = event.command.get_issuing_user();
     if (eventName == "ping")
     {
-        event.reply(dpp::message(std::string("ping ") + eventUsr.username).set_flags(dpp::m_ephemeral));
+        handleSlashCMD_Ping(event);
     }
     else if (eventName == "say")
     {
-        event.reply(get<string>(event.get_parameter("content")));
+        handleSlashCMD_Say(event);
     }
     else if (eventName == "dm")
     {
-        dpp::snowflake user = std::get<dpp::snowflake>(event.get_parameter("user"));
-
-        bot.direct_message_create(user, std::get<string>(event.get_parameter("content")), [event, user](const dpp::confirmation_callback_t &callback)
-                                  {
-            if (callback.is_error())
-            {
-                event.reply(dpp::message("Failed to send DM").set_flags(dpp::m_ephemeral));
-            } else {
-                event.reply(dpp::message("DM sent").set_flags(dpp::m_ephemeral));} });
+        handleSlashCMD_Dm(bot, event);
+    }
+    else if (eventName == "jail")
+    {
+        handleSlashCMD_Jail(bot, event);
+    }
+    else if (eventName == "set_jail_channel")
+    {
+        handleSlashCMD_RegisterJailChannel(bot, event);
+    }
+    else if (eventName == "set_jail_role")
+    {
+        handleSlashCMD_RegisterJailRole(bot, event);
     }
 }
 
@@ -60,7 +85,6 @@ void handleOnReady(const dpp::ready_t &event)
 {
     logDebugInfo("creating global commands");
     std::vector<dpp::slashcommand> g_cmdVec;
-
     // global commands
     dpp::slashcommand pingCMD("ping", "Ping Orpheus", bot.me.id);
     g_cmdVec.push_back(pingCMD);
@@ -70,9 +94,24 @@ void handleOnReady(const dpp::ready_t &event)
     g_cmdVec.push_back(sayCMD);
 
     dpp::slashcommand dmCMD("dm", "Make orpheus dm a user", bot.me.id);
-    dmCMD.add_option(dpp::command_option(dpp::co_mentionable, "user", "User to dm", true));
+    dmCMD.add_option(dpp::command_option(dpp::co_user, "user", "User to dm", true));
     dmCMD.add_option(dpp::command_option(dpp::co_string, "content", "Message", true));
     g_cmdVec.push_back(dmCMD);
+
+    dpp::slashcommand jailCMD("jail", "Send A User to Server Jail", bot.me.id);
+    jailCMD.add_option(dpp::command_option(dpp::co_user, "user", "User to Jail", true));
+    jailCMD.default_member_permissions = 0;
+    g_cmdVec.push_back(jailCMD);
+
+    dpp::slashcommand registerJailIdCMD("set_jail_channel", "Set Channel for jail appeal", bot.me.id);
+    registerJailIdCMD.add_option(dpp::command_option(dpp::co_channel, "channel", "Appeal Channel", true));
+    registerJailIdCMD.default_member_permissions = 0;
+    g_cmdVec.push_back(registerJailIdCMD);
+
+    dpp::slashcommand registerJailRoleIdCMD("set_jail_role", "Set Role for jail", bot.me.id);
+    registerJailRoleIdCMD.add_option(dpp::command_option(dpp::co_role, "role", "Jail Role", true));
+    registerJailRoleIdCMD.default_member_permissions = 0;
+    g_cmdVec.push_back(registerJailRoleIdCMD);
 
     bot.global_bulk_command_create(g_cmdVec);
 }

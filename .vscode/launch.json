@@ -15,6 +15,18 @@
             "environment": [],
             "console": "integratedTerminal",
             "preLaunchTask": "cmake debug build",
+        },
+        {
+            "name": "(Windows) Launch RELEASE",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/out/build/win64/Release/OrpheusCPP.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "console": "integratedTerminal",
+            "preLaunchTask": "cmake release build",
         }
 
     ]
