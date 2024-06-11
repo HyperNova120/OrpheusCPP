@@ -8,11 +8,11 @@ set(VCPKG_TARGET_TRIPLET x64-windows)
 
 project(OrpheusCPP VERSION 0.1.0 LANGUAGES C CXX)
 
-include_directories(C:/Users/amess/vcpkg/installed/x64-windows/include)
+include_directories(C:/Users/amess/vcpkg/installed/x64-windows/include include)
 link_directories(C:/Users/amess/vcpkg/installed/x64-windows/lib)
 include(C:/Users/amess/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
-include_directories(include)
+#include_directories(include)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(dpp CONFIG REQUIRED) 
